@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "967640157497",
+    "project_id": "fir-news-app-ad554",
+    "storage_bucket": "fir-news-app-ad554.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:967640157497:android:6cd1129bbc59af3d23ece8",
+        "android_client_info": {
+          "package_name": "com.example.news_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "967640157497-hab6fujv1vsgkkdl60nmeotqe5jeeqck.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDJAZSgoYOZWPgE9hVyhf7FX3OrfCR1CI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "967640157497-hab6fujv1vsgkkdl60nmeotqe5jeeqck.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
