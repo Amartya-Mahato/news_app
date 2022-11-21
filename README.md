@@ -1,16 +1,18 @@
-# news_app
+# News App
 
-A new Flutter project.
+A flutter based Project with firebase.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+In this Project you can read and write artical, in the artical you can write it's `title`, `discription`, `fee` (if the user want's to pay for that artical - only Upi), upload `images`.
 
-A few resources to get you started if this is your first Flutter project:
+You can perform all type of `CRUD` oprations on articals, like `Create Artical` , `Delete Artical`, `Update Artical`, `Read Artical`.
+In the Reader Mode you can read all the articals uploaded by the different users and pay for it if you want.
+There is a section to keep all your liked articals in the cart.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Technologies Used
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Dart (Flutter)
+- Firebase Firestore Database
+- Firebase Storage
+- Firebase Authentication
