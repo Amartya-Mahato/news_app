@@ -1,13 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:news_app/pages/artical_page.dart';
-import 'package:news_app/pages/edit_page.dart';
-import 'package:news_app/pages/reader_home.dart';
-import 'package:news_app/pages/write_artical.dart';
+import 'package:news_app/controllers/database.dart';
+import 'package:news_app/controllers/navigation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'login_page.dart';
 
 class WriterHome extends StatefulWidget {
   const WriterHome({super.key});
@@ -20,7 +15,6 @@ class _WriterHomeState extends State<WriterHome> {
   String? name;
   String email = 'email';
   String upi = 'upi';
-  bool isWriter = true;
   List<Object>? articalFields = [];
 
   @override
@@ -32,10 +26,9 @@ class _WriterHomeState extends State<WriterHome> {
   void initialSetter() async {
     var value = await SharedPreferences.getInstance();
     name = value.getString('name')!;
-    isWriter = value.getBool('isWriter')!;
     email = value.getString('email')!;
     var doc =
-        await FirebaseFirestore.instance.collection('writers').doc(email).get();
+        await FirebaseFirestore.instance.collection('user').doc(email).get();
     upi = doc.data()!['upi'];
     value.setString('upi', upi);
     setState(() {});
@@ -77,14 +70,10 @@ class _WriterHomeState extends State<WriterHome> {
                       border: Border.all(color: Colors.black54, width: 2)),
                   child: InkWell(
                     onTap: (() {
-                      Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                              builder: ((context) => const ReaderHome())),
-                          (route) => false);
+                      Navigation.toReaderHomeAndRemovePrevPages(context);
                     }),
                     child: const ListTile(
-                      leading: Icon(Icons.edit),
+                      leading: Icon(Icons.read_more),
                       title: Text(
                         'Reader Mode',
                         style: TextStyle(color: Colors.black54, fontSize: 18),
@@ -101,20 +90,7 @@ class _WriterHomeState extends State<WriterHome> {
                       border: Border.all(color: Colors.black54, width: 2)),
                   child: InkWell(
                     onTap: () {
-                      FirebaseAuth.instance.signOut();
-                      SharedPreferences.getInstance().then((value) {
-                        value.remove('name');
-                        value.remove('email');
-                        value.remove('isWriter');
-                        value.remove('login');
-                        value.clear();
-
-                        Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                                builder: ((context) => const LoginPage())),
-                            (route) => false);
-                      });
+                      Navigation.toLogout(context);
                     },
                     child: const ListTile(
                       leading: Icon(Icons.logout_rounded),
@@ -136,20 +112,7 @@ class _WriterHomeState extends State<WriterHome> {
             Text(name == null ? "Loading" : name!),
             InkWell(
               onTap: () {
-                FirebaseAuth.instance.signOut();
-                SharedPreferences.getInstance().then((value) {
-                  value.remove('name');
-                  value.remove('email');
-                  value.remove('isWriter');
-                  value.remove('login');
-                  value.clear();
-
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                          builder: ((context) => const LoginPage())),
-                      (route) => false);
-                });
+                Navigation.toLogout(context);
               },
               child: const Icon(Icons.logout_rounded),
             )
@@ -166,6 +129,7 @@ class _WriterHomeState extends State<WriterHome> {
                   .where('email', isEqualTo: email)
                   .snapshots(),
               builder: (context, snapshot) {
+
                 if (snapshot.hasError) {
                   return const Center(child: Text('Something went wrong'));
                 }
@@ -189,13 +153,8 @@ class _WriterHomeState extends State<WriterHome> {
                         padding: const EdgeInsets.all(10.0),
                         child: InkWell(
                           onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (ctx) => ArticalPage(
-                                          docs:
-                                              snapshot.data!.docs[index].data(),
-                                        )));
+                            Navigation.toArticalPage(
+                                context, snapshot.data!.docs, index);
                           },
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -219,19 +178,17 @@ class _WriterHomeState extends State<WriterHome> {
                                   padding: const EdgeInsets.all(8.0),
                                   child: InkWell(
                                     onTap: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: ((context) => EditPage(
-                                                  snapshot: snapshot
-                                                      .data!.docs[index]))));
+                                      Navigation.toEditArticalPage(
+                                          context, snapshot.data!.docs[index]);
                                       setState(() {});
                                     },
                                     child: Container(
                                       padding: const EdgeInsets.all(4.0),
-                                      decoration: const BoxDecoration(
+                                      decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: Colors.white, width: 2),
                                           color: Colors.black,
-                                          borderRadius: BorderRadius.all(
+                                          borderRadius: const BorderRadius.all(
                                               Radius.circular(5))),
                                       child: const Icon(
                                         Icons.edit,
@@ -264,39 +221,11 @@ class _WriterHomeState extends State<WriterHome> {
             ),
       floatingActionButton: FloatingActionButton(
           onPressed: (() async {
-            articalFields = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: ((context) => WriteArtical(
-                          name: name!,
-                          email: email,
-                        ))));
-            if (articalFields != null) {
-              var document =
-                  FirebaseFirestore.instance.collection('articals').doc();
-              document.set({
-                'discount_fee': articalFields![3] as int,
-                'discription': articalFields![4] as String,
-                'fee': articalFields![2] as int,
-                'image': articalFields![0] as String,
-                'title': articalFields![1] as String,
-                'upi': upi,
-                'writer': name,
-                'email': email,
-              });
+            articalFields =
+                await Navigation.toWriteArticalPage(context, name!, email);
 
-              FirebaseFirestore.instance
-                  .collection('writers')
-                  .doc(email)
-                  .get()
-                  .then((value) async {
-                Map<String, dynamic> mpp = value.data()!;
-                mpp['artical'].add(document.id);
-                await FirebaseFirestore.instance
-                    .collection('writers')
-                    .doc(email)
-                    .update({'artical': mpp['artical']});
-              });
+            if (articalFields != null) {
+              Database.createArtical(articalFields!, upi, name!, email);
             }
           }),
           child: const Center(child: Icon(Icons.edit))),

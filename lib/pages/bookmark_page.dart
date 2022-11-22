@@ -1,18 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:news_app/controllers/database.dart';
+import 'package:news_app/controllers/navigation.dart';
 import 'package:news_app/modules/cart_sream.dart';
-import 'package:news_app/pages/artical_page.dart';
 
-class CartPage extends StatefulWidget {
-  const CartPage({super.key, required this.email});
+class BookmarkPage extends StatefulWidget {
+  const BookmarkPage({super.key, required this.email});
   final String email;
 
   @override
-  State<CartPage> createState() => _CartPageState();
+  State<BookmarkPage> createState() => _BookmarkPageState();
 }
 
-class _CartPageState extends State<CartPage> {
-  List<DocumentSnapshot<Map<String, dynamic>>>? cartItems;
+class _BookmarkPageState extends State<BookmarkPage> {
+  List<QueryDocumentSnapshot<Map<String, dynamic>>>? cartItems;
 
   @override
   void initState() {
@@ -33,7 +34,7 @@ class _CartPageState extends State<CartPage> {
           title: Row(
             children: [
               const Text(
-                'Cart',
+                'Bookmark',
                 style: TextStyle(color: Colors.white),
               ),
               const Spacer(),
@@ -53,11 +54,7 @@ class _CartPageState extends State<CartPage> {
                     padding: const EdgeInsets.all(10.0),
                     child: InkWell(
                       onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: ((context) => ArticalPage(
-                                    docs: cartItems![index].data()!))));
+                        Navigation.toArticalPage(context, cartItems!, index);
                       },
                       child: Container(
                         decoration: BoxDecoration(
@@ -75,8 +72,7 @@ class _CartPageState extends State<CartPage> {
                               SizedBox(
                                 width: MediaQuery.of(context).size.width - 70,
                                 child: Text(
-                                  cartItems![index].data()!['title'],
-                                  
+                                  cartItems![index].data()['title'],
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 1,
                                   style: const TextStyle(
@@ -88,19 +84,12 @@ class _CartPageState extends State<CartPage> {
                               ),
                               InkWell(
                                 onTap: () async {
-                                  var doc = FirebaseFirestore.instance
-                                      .collection('reader')
-                                      .doc(widget.email);
-
-                                  List<dynamic> list;
-                                  doc.get().then((value) {
-                                    list = value.data()!['cart'];
-                                    list.remove(cartItems![index].id);
-                                    cartItems!.remove(cartItems![index]);
-                                    doc.update({'cart': list});
-
-                                    setState(() {});
-                                  });
+                                  cartItems = await Database.deleteBookmark(
+                                      widget.email,
+                                      cartItems![index].id,
+                                      cartItems!,
+                                      index);
+                                  setState(() {});
                                 },
                                 child: const Icon(
                                   Icons.delete,

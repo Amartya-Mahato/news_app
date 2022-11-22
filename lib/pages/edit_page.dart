@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:news_app/controllers/database.dart';
 
 class EditPage extends StatefulWidget {
   const EditPage({super.key, required this.snapshot});
@@ -18,12 +19,13 @@ class _EditPageState extends State<EditPage> {
   bool initialUpload = false;
   String? title;
   String? discription;
-  int? fee;
-  int? disFee;
+  int? likes;
+  int? amount;
   String? upi;
   String? image;
   String? writer;
   String? email;
+  List? liked;
 
   @override
   void initState() {
@@ -35,12 +37,13 @@ class _EditPageState extends State<EditPage> {
     Map<String, dynamic> data = widget.snapshot.data();
     title = data['title'];
     discription = data['discription'];
-    fee = data['fee'];
-    disFee = data['discount_fee'];
+    amount = data['amount'];
     image = data['image'];
     upi = data['upi'];
     writer = data['writer'];
     email = data['email'];
+    likes = data['likes'];
+    liked = data['liked'];
   }
 
   @override
@@ -56,42 +59,7 @@ class _EditPageState extends State<EditPage> {
           const Spacer(),
           InkWell(
             onTap: (() async {
-              // Remove the artical
-              FirebaseFirestore.instance
-                  .collection('articals')
-                  .doc(widget.snapshot.id)
-                  .delete();
-
-              //Remove from writer account
-              var doc =
-                  FirebaseFirestore.instance.collection('writers').doc(email);
-              var snapshot = await doc.get();
-              List list = snapshot.data()!['artical'];
-              list.remove(widget.snapshot.id);
-              await doc.update({'artical': list});
-
-              // Remove from reader's account
-              var query = FirebaseFirestore.instance
-                  .collection('reader')
-                  .where('cart', arrayContains: widget.snapshot.id);
-              var querySnapshot = await query.get();
-              List<QueryDocumentSnapshot<Map<String, dynamic>>> queryList =
-                  querySnapshot.docs;
-              for (int i = 0; i < queryList.length; i++) {
-                List cartList = queryList[i].data()['cart'];
-                cartList.remove(widget.snapshot.id);
-                await FirebaseFirestore.instance
-                    .collection('reader')
-                    .doc(queryList[i].id)
-                    .update({'cart': cartList});
-              }
-
-              //Remove the image
-              FirebaseStorage.instance
-                  .refFromURL(widget.snapshot.data()['image'])
-                  .delete();
-
-              Navigator.pop(context);
+              Database.deleteArtical(context, widget.snapshot, email!);
             }),
             child: Icon(
               Icons.delete,
@@ -125,27 +93,10 @@ class _EditPageState extends State<EditPage> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               onChanged: (value) {
-                fee = int.parse(value);
+                amount = int.parse(value);
               },
               decoration: InputDecoration(
-                hintText: fee.toString(),
-                hintStyle: const TextStyle(color: Colors.grey),
-                fillColor: Colors.deepPurple,
-                suffixIcon: const Icon(Icons.monetization_on_rounded),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              onChanged: (value) {
-                disFee = int.parse(value);
-              },
-              decoration: InputDecoration(
-                hintText: disFee.toString(),
+                hintText: amount.toString(),
                 hintStyle: const TextStyle(color: Colors.grey),
                 fillColor: Colors.deepPurple,
                 suffixIcon: const Icon(Icons.discount_rounded),
@@ -212,28 +163,19 @@ class _EditPageState extends State<EditPage> {
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
               onPressed: () {
-                if (image != widget.snapshot.data()['image']) {
-                  FirebaseStorage.instance
-                      .refFromURL(widget.snapshot.data()['image'])
-                      .delete();
-                }
-                FirebaseFirestore.instance
-                    .collection('articals')
-                    .doc(widget.snapshot.id)
-                    .set({
-                  'discount_fee': disFee,
-                  'discription': discription,
-                  'fee': fee,
-                  'image': image,
-                  'title': title,
-                  'upi': upi,
-                  'writer': writer,
-                  'email': email,
-                });
-
-                if (!isUploading) {
-                  Navigator.pop(context);
-                }
+                Database.appyEdits(
+                    isUploading,
+                    context,
+                    widget.snapshot,
+                    image!,
+                    amount!,
+                    discription!,
+                    title!,
+                    upi!,
+                    likes!,
+                    writer!,
+                    liked!,
+                    email!);
               },
               child: const Text("Apply"),
             ),

@@ -1,12 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:news_app/pages/cart_page.dart';
-import 'package:news_app/pages/login_page.dart';
-import 'package:news_app/pages/writer_home.dart';
+import 'package:news_app/controllers/database.dart';
+import 'package:news_app/controllers/navigation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'artical_page.dart';
 
 class ReaderHome extends StatefulWidget {
   const ReaderHome({super.key});
@@ -69,11 +65,7 @@ class _ReaderHomeState extends State<ReaderHome> {
                       border: Border.all(color: Colors.black54, width: 2)),
                   child: InkWell(
                     onTap: (() {
-                      Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                              builder: ((context) => const WriterHome())),
-                          (route) => false);
+                      Navigation.toWriterHomeAndRemovePrevPages(context);
                     }),
                     child: const ListTile(
                       leading: Icon(Icons.edit),
@@ -93,20 +85,7 @@ class _ReaderHomeState extends State<ReaderHome> {
                       border: Border.all(color: Colors.black54, width: 2)),
                   child: InkWell(
                     onTap: () {
-                      FirebaseAuth.instance.signOut();
-                      SharedPreferences.getInstance().then((value) {
-                        value.remove('name');
-                        value.remove('email');
-                        value.remove('isWriter');
-                        value.remove('login');
-                        value.clear();
-
-                        Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                                builder: ((context) => const LoginPage())),
-                            (route) => false);
-                      });
+                      Navigation.toLogout(context);
                     },
                     child: const ListTile(
                       leading: Icon(Icons.logout_rounded),
@@ -128,20 +107,7 @@ class _ReaderHomeState extends State<ReaderHome> {
             Text(name),
             InkWell(
               onTap: () {
-                FirebaseAuth.instance.signOut();
-                SharedPreferences.getInstance().then((value) {
-                  value.remove('name');
-                  value.remove('email');
-                  value.remove('isWriter');
-                  value.remove('login');
-                  value.clear();
-
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                          builder: ((context) => const LoginPage())),
-                      (route) => false);
-                });
+                Navigation.toLogout(context);
               },
               child: const Icon(Icons.logout_rounded),
             )
@@ -174,36 +140,12 @@ class _ReaderHomeState extends State<ReaderHome> {
                   padding: const EdgeInsets.all(10.0),
                   child: InkWell(
                     onLongPress: () {
-                      DocumentReference<Map<String, dynamic>> doc =
-                          FirebaseFirestore.instance
-                              .collection('reader')
-                              .doc(email);
-
-                      doc.get().then((value) {
-                        List list = value.data()!['cart'];
-                        if (!list.contains(snapshot.data!.docs[index].id)) {
-                          list.add(snapshot.data!.docs[index].id);
-                          doc.update({'cart': list});
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  backgroundColor: Colors.black,
-                                  content: Text("Artical added in your cart")));
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  backgroundColor: Colors.black,
-                                  content: Text(
-                                      "Artical is already present in you cart")));
-                        }
-                      });
+                      Database.addToBookmark(
+                          context, email, snapshot.data!.docs[index].id);
                     },
                     onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (ctx) => ArticalPage(
-                                    docs: snapshot.data!.docs[index].data(),
-                                  )));
+                      Navigation.toArticalPage(
+                          context, snapshot.data!.docs, index);
                     },
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -224,41 +166,23 @@ class _ReaderHomeState extends State<ReaderHome> {
                           ),
                           child: InkWell(
                             onTap: () {
-                              DocumentReference<Map<String, dynamic>> doc =
-                                  FirebaseFirestore.instance
-                                      .collection('reader')
-                                      .doc(email);
-
-                              doc.get().then((value) {
-                                List list = value.data()!['cart'];
-                                if (!list
-                                    .contains(snapshot.data!.docs[index].id)) {
-                                  list.add(snapshot.data!.docs[index].id);
-                                  doc.update({'cart': list});
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          backgroundColor: Colors.black,
-                                          content: Text(
-                                              "Artical added in your cart")));
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          backgroundColor: Colors.black,
-                                          content: Text(
-                                              "Artical is already present in you cart")));
-                                }
-                              });
+                              Database.addToBookmark(context, email,
+                                  snapshot.data!.docs[index].id);
                             },
                             child: Padding(
                               padding: const EdgeInsets.all(4.0),
                               child: Container(
                                 padding: const EdgeInsets.all(4.0),
-                                decoration: const BoxDecoration(
+                                decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: Colors.white, width: 2),
                                     color: Colors.black,
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                child:
-                                    const Icon(Icons.add_shopping_cart_rounded, color: Colors.white,),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(10))),
+                                child: const Icon(
+                                  Icons.bookmark_add,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ),
@@ -285,12 +209,9 @@ class _ReaderHomeState extends State<ReaderHome> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.shopping_cart_rounded),
+        child: const Icon(Icons.bookmark),
         onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: ((context) => CartPage(email: email))));
+          Navigation.toBookmarkPage(context, email);
         },
       ),
     );

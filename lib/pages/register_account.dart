@@ -1,13 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:news_app/pages/reader_home.dart';
-import 'package:news_app/pages/writer_home.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:news_app/controllers/database.dart';
+
 
 class RegisterAccount extends StatefulWidget {
-  const RegisterAccount({super.key, required this.isWriter});
-  final bool isWriter;
+  const RegisterAccount({super.key});
   @override
   State<RegisterAccount> createState() => _RegisterAccountState();
 }
@@ -108,40 +104,7 @@ class _RegisterAccountState extends State<RegisterAccount> {
                 padding: const EdgeInsets.all(8.0),
                 child: ElevatedButton(
                   onPressed: () {
-                    FirebaseAuth.instance
-                        .createUserWithEmailAndPassword(
-                            email: email, password: pass)
-                        .then((value) {
-                      SharedPreferences.getInstance().then((pref) {
-                        pref.setBool('login', true);
-                        pref.setString('email', email);
-                        pref.setBool('isWriter', widget.isWriter);
-                        pref.setString('name', name);
-                        pref.setString('upi', upi);
-
-                        FirebaseFirestore.instance
-                            .collection('writers')
-                            .doc(email)
-                            .set({
-                          'artical': [],
-                          'name': name,
-                          'upi': upi
-                        }).then((_) {
-                          FirebaseFirestore.instance
-                              .collection('reader')
-                              .doc(email)
-                              .set({'cart': [], 'name': name}).then((_) {
-                            Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => widget.isWriter
-                                        ? const WriterHome()
-                                        : const ReaderHome()),
-                                (route) => false);
-                          });
-                        });
-                      });
-                    }).onError((error, stackTrace) {});
+                    Database.registerAccount(context, email, pass, upi, name);
                   },
                   child: const Text("Register"),
                 ),

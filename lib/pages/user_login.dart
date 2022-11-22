@@ -1,14 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:news_app/pages/reader_home.dart';
-import 'package:news_app/pages/register_account.dart';
-import 'package:news_app/pages/writer_home.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:news_app/controllers/database.dart';
+import 'package:news_app/controllers/navigation.dart';
 
 class UserLogin extends StatefulWidget {
-  const UserLogin({super.key, required this.isWriter});
-  final bool isWriter;
+  const UserLogin({super.key});
 
   @override
   State<UserLogin> createState() => _UserLoginState();
@@ -30,8 +25,8 @@ class _UserLoginState extends State<UserLogin> {
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Text(
-                  widget.isWriter ? 'Writer Login' : 'Reader Login',
-                  style: const TextStyle(fontSize: 30),
+                  'User Login',
+                  style: TextStyle(fontSize: 30, color: Colors.blue.shade600),
                 ),
               ),
               Padding(
@@ -73,35 +68,7 @@ class _UserLoginState extends State<UserLogin> {
                 padding: const EdgeInsets.all(8.0),
                 child: ElevatedButton(
                   onPressed: () {
-                    FirebaseAuth.instance
-                        .signInWithEmailAndPassword(
-                            email: email, password: pass)
-                        .then((value) async {
-                      SharedPreferences.getInstance().then((pref) {
-                        pref.setBool('login', true);
-                        pref.setString('email', email);
-                        pref.setBool('isWriter', widget.isWriter);
-
-                        FirebaseFirestore.instance
-                            .collection(widget.isWriter ? 'writers' : 'reader')
-                            .doc(email)
-                            .get()
-                            .then((documentsnapshot) {
-                          pref.setString('name', documentsnapshot['name']);
-                          if (widget.isWriter) {
-                            pref.setString('upi', documentsnapshot['upi']);
-                          }
-
-                          Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => widget.isWriter
-                                      ? const WriterHome()
-                                      : const ReaderHome()),
-                              (route) => false);
-                        });
-                      });
-                    }).onError((error, stackTrace) {});
+                    Database.loginAccount(context, email, pass);
                   },
                   child: const Text("Next"),
                 ),
@@ -110,14 +77,9 @@ class _UserLoginState extends State<UserLogin> {
                 padding: const EdgeInsets.all(8.0),
                 child: TextButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => RegisterAccount(
-                                  isWriter: widget.isWriter,
-                                )));
+                    Navigation.toRegisterPage(context);
                   },
-                  child: const Text("Don't have a account ? Create one here!"),
+                  child: const Text("Don't have an account ? Create one here!"),
                 ),
               )
             ],
