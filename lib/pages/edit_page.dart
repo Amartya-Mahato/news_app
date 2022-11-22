@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:news_app/controllers/database.dart';
+import 'package:news_app/controllers/database_controller.dart';
 
 class EditPage extends StatefulWidget {
   const EditPage({super.key, required this.snapshot});

@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:news_app/controllers/database.dart';
-import 'package:news_app/controllers/navigation.dart';
+import 'package:news_app/controllers/database_controller.dart';
+import 'package:news_app/controllers/navigation_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WriterHome extends StatefulWidget {

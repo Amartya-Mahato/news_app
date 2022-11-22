@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:news_app/controllers/database.dart';
-import 'package:news_app/controllers/navigation.dart';
+import 'package:news_app/controllers/database_controller.dart';
+import 'package:news_app/controllers/navigation_controller.dart';
 
 class UserLogin extends StatefulWidget {
   const UserLogin({super.key});

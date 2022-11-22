@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:news_app/controllers/navigation.dart';
+import 'package:news_app/controllers/navigation_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Database {

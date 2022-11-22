@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:news_app/controllers/database.dart';
+import 'package:news_app/controllers/database_controller.dart';
 
 
 class RegisterAccount extends StatefulWidget {

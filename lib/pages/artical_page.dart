@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:news_app/controllers/database.dart';
+import 'package:news_app/controllers/database_controller.dart';
 import 'package:upi_india/upi_india.dart';
 
 class ArticalPage extends StatefulWidget {
