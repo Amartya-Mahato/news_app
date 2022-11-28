@@ -170,7 +170,7 @@ class _WriterHomeState extends State<WriterHome> {
                                               .data!.docs[index]
                                               .data()['image'])
                                           .image,
-                                      fit: BoxFit.fill),
+                                      fit: BoxFit.cover),
                                   borderRadius: const BorderRadius.all(
                                       Radius.circular(10)),
                                 ),

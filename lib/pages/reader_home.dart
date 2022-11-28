@@ -13,7 +13,7 @@ class ReaderHome extends StatefulWidget {
 
 class _ReaderHomeState extends State<ReaderHome> {
   String email = 'email';
-  String name = 'name';
+  String? name;
 
   @override
   void initState() {
@@ -22,9 +22,10 @@ class _ReaderHomeState extends State<ReaderHome> {
   }
 
   void setInitialItems() async {
-    await SharedPreferences.getInstance().then((value) {
+    // await Future.delayed(const Duration(seconds: 3));
+    SharedPreferences.getInstance().then((value) {
       email = value.getString('email')!;
-      name = value.getString('name')!;
+      name = value.getString('name');
       setState(() {});
     });
   }
@@ -46,7 +47,7 @@ class _ReaderHomeState extends State<ReaderHome> {
                         height: 15,
                       ),
                       Text(
-                        name,
+                        name == null ? 'Loading..' : name!,
                         style:
                             const TextStyle(color: Colors.white, fontSize: 20),
                       ),
@@ -104,7 +105,7 @@ class _ReaderHomeState extends State<ReaderHome> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(name),
+            Text(name == null ? 'Loading..' : name!),
             InkWell(
               onTap: () {
                 Navigation.toLogout(context);
@@ -133,79 +134,80 @@ class _ReaderHomeState extends State<ReaderHome> {
           }
 
           return ListView.builder(
-              physics: const BouncingScrollPhysics(),
-              itemCount: snapshot.data!.docs.length,
-              itemBuilder: ((context, index) {
-                return Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: InkWell(
-                    onLongPress: () {
-                      Database.addToBookmark(
-                          context, email, snapshot.data!.docs[index].id);
-                    },
-                    onTap: () {
-                      Navigation.toArticalPage(
-                          context, snapshot.data!.docs, index);
-                    },
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Container(
-                          alignment: Alignment.topRight,
-                          height: 250,
-                          width: 100,
-                          decoration: BoxDecoration(
-                            color: Colors.grey,
-                            image: DecorationImage(
-                                image: Image.network(snapshot.data!.docs[index]
-                                        .data()['image'])
-                                    .image,
-                                fit: BoxFit.fill),
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(10)),
-                          ),
-                          child: InkWell(
-                            onTap: () {
-                              Database.addToBookmark(context, email,
-                                  snapshot.data!.docs[index].id);
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: Container(
-                                padding: const EdgeInsets.all(4.0),
-                                decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: Colors.white, width: 2),
-                                    color: Colors.black,
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(10))),
-                                child: const Icon(
-                                  Icons.bookmark_add,
-                                  color: Colors.white,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: ((context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: InkWell(
+                        onLongPress: () {
+                          Database.addToBookmark(
+                              context, email, snapshot.data!.docs[index].id);
+                        },
+                        onTap: () {
+                          Navigation.toArticalPage(
+                              context, snapshot.data!.docs, index);
+                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Container(
+                              alignment: Alignment.topRight,
+                              height: 250,
+                              width: 100,
+                              decoration: BoxDecoration(
+                                color: Colors.grey,
+                                image: DecorationImage(
+                                    image: Image.network(snapshot
+                                            .data!.docs[index]
+                                            .data()['image'])
+                                        .image,
+                                    fit: BoxFit.cover),
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(10)),
+                              ),
+                              child: InkWell(
+                                onTap: () {
+                                  Database.addToBookmark(context, email,
+                                      snapshot.data!.docs[index].id);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4.0),
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: Colors.white, width: 2),
+                                        color: Colors.black,
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(10))),
+                                    child: const Icon(
+                                      Icons.bookmark_add,
+                                      color: Colors.white,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width,
-                          child: Center(
-                            child: Text(
-                              snapshot.data!.docs[index].data()['title'],
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontStyle: FontStyle.italic,
-                                fontSize: 20,
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              child: Center(
+                                child: Text(
+                                  snapshot.data!.docs[index].data()['title'],
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontStyle: FontStyle.italic,
+                                    fontSize: 20,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                );
-              }));
+                      ),
+                    );
+                  }));
         },
       ),
       floatingActionButton: FloatingActionButton(

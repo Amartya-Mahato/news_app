@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:news_app/controllers/database_controller.dart';
 
+import '../controllers/navigation_controller.dart';
 
 class RegisterAccount extends StatefulWidget {
   const RegisterAccount({super.key});
@@ -13,6 +14,7 @@ class _RegisterAccountState extends State<RegisterAccount> {
   String pass = 'pass';
   String upi = 'upi';
   String name = 'name';
+  bool isDone = true;
 
   @override
   Widget build(BuildContext context) {
@@ -101,12 +103,20 @@ class _RegisterAccountState extends State<RegisterAccount> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Database.registerAccount(context, email, pass, upi, name);
+                padding: const EdgeInsets.all(10.0),
+                child: !isDone ? const Center( child: CircularProgressIndicator(),) : ElevatedButton(
+                  onPressed: () async {
+                    if (isDone) {
+                      isDone = false;
+                      setState(() {});
+                      await Database.registerAccount(
+                          context, email, pass, upi, name);
+                      isDone = true;
+                      setState(() {});
+                      Navigation.toReaderHomeAndRemovePrevPages(context);
+                    }
                   },
-                  child: const Text("Register"),
+                  child:  const Text("Register"),
                 ),
               ),
             ],

@@ -137,27 +137,20 @@ class Database {
     });
   }
 
-  static void registerAccount(BuildContext context, String email, String pass,
-      String upi, String name) {
-    FirebaseAuth.instance
-        .createUserWithEmailAndPassword(email: email, password: pass)
-        .then((value) {
-      SharedPreferences.getInstance().then((pref) {
-        pref.setBool('login', true);
-        pref.setString('email', email);
-        pref.setString('name', name);
-        pref.setString('upi', upi);
+  static Future<void> registerAccount(BuildContext context, String email,
+      String pass, String upi, String name) async {
+    await FirebaseAuth.instance
+        .createUserWithEmailAndPassword(email: email, password: pass);
+    var pref = await SharedPreferences.getInstance();
+    pref.setBool('login', true);
+    pref.setString('email', email);
+    pref.setString('name', name);
+    pref.setString('upi', upi);
 
-        FirebaseFirestore.instance.collection('user').doc(email).set({
-          'bookmark': [],
-          'articals': [],
-          'name': name,
-          'upi': upi
-        }).then((_) {
-          Navigation.toReaderHomeAndRemovePrevPages(context);
-        });
-      });
-    }).onError((error, stackTrace) {});
+    await FirebaseFirestore.instance
+        .collection('user')
+        .doc(email)
+        .set({'bookmark': [], 'articals': [], 'name': name, 'upi': upi});
   }
 
   static void loginAccount(BuildContext context, String email, String pass) {
